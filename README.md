@@ -93,9 +93,6 @@ cp ~/Downloads/glip_tiny_a_mmdet-b3654169.pth ./pretrained
 
 #Bert下载
 python ./pretrained/download_Bert.py
-
-通过网盘分享的文件：mmdetection-TALIR
-链接: https://pan.baidu.com/s/1WPK0o30rKm3XMU1Q9_POVw 提取码: r8xa
 ```
 
 > 如未获得权重文件，可从 [OpenMMLab 模型库](https://github.com/open-mmlab/mmdetection/blob/v3.3.0/configs/glip/README.md) 下载 `glip_tiny_mmdet.pth`，或直接点击下面的链接下载权重。
