@@ -10,7 +10,6 @@
 应包含以下内容：
 
 ```
-
 ├──TALIR-main/
 │   ├── README.md                      # 文档
 │   ├── configs                        # mmdetection_configs
