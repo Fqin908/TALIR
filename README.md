@@ -3,29 +3,6 @@
 > 论文：*Learning Task-Aware Language-Image Representation for Class-Incremental Object Detection* (AAAI-24)
 >
 > 本指南面向**组员/测试组**，从零开始搭建环境并复现实验。
->
-> **小组分工：**
->
-> •朱嘉鹏（组长）：项目整体推进、代码架构设计及实现、实验测试（TAM, ELEMAX, ELEMEAN, 完善训练和消融实验脚本）、文档及结果汇总
->
-> •熊婷：代码架构设计及实现、实验测试（恢复GLIP权重进行训练, TAM, ROWMAX,10+10增量训练, baseline）、文档
->
-> **TALIR实验**：
->
-> •张桓伟：15+5增量训练
->
-> •王双奇：19+1增量训练
->
-> •经李喆、贺如义: Vision+Language + ROWMAX/elemax/elemean
->
-> •江昊东: Baseline + ROWMAX/elemax/elemean
->
-> •张栩午: Vision Only + ROWMAX 和 Language Only + ROWMAX
->
-> **测试小组：**
->
-> •王宇轩、詹宁：测试其他小组
-
 ---
 
 ## 一、交付文件清单
