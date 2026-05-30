@@ -11,7 +11,7 @@
 
 ```
 
-├──mmdetection-TALIR/
+├──TALIR-main/
 │   ├── README.md                      # 文档
 │   ├── configs                        # mmdetection_configs
 │   ├── mmdet                          # mmdetection
@@ -88,11 +88,14 @@ pip install transformers==4.36.0 pillow numpy==1.24.3
 ### 3.1 放入预训练权重（如交付包中包含）
 
 ```bash
-# 预训练权重放在  mmdetection-TALIR/pretrained
+# 预训练权重放在  TALIR-main/pretrained
 cp ~/Downloads/glip_tiny_a_mmdet-b3654169.pth ./pretrained
 
 #Bert下载
 python ./pretrained/download_Bert.py
+
+通过网盘分享的文件：mmdetection-TALIR
+链接: https://pan.baidu.com/s/1WPK0o30rKm3XMU1Q9_POVw 提取码: r8xa
 ```
 
 > 如未获得权重文件，可从 [OpenMMLab 模型库](https://github.com/open-mmlab/mmdetection/blob/v3.3.0/configs/glip/README.md) 下载 `glip_tiny_mmdet.pth`，或直接点击下面的链接下载权重。
@@ -115,7 +118,7 @@ python ./pretrained/download_Bert.py
 ### 4.1 下载 VOC2007（可在官网自行下载）
 
 ```bash
-# 在 mmdetection 同级目录创建 data 文件夹
+# 在 TALIR-main 同级目录创建 data 文件夹(最后不包含VOCdevkit这一层文件夹)
 # 下载 voc2007
 wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar
 wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar
@@ -129,7 +132,7 @@ tar -xf VOCdevkit_08-Jun-2007.tar
 
 最终目录结构应为：
 ```
-mmdetection-TALIR/data/voc2007/
+TALIR-main/data/voc2007/
 ├── Annotations/
 ├── ImageSets/
 │   └── Main/
@@ -143,7 +146,7 @@ mmdetection-TALIR/data/voc2007/
 运行preprocess_voc.py，默认当前的位置是 ~/mmdetection/
 
 ```
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python data_preprocess/preprocess_voc.py --protocol 10_10 --seed 42
 python data_preprocess/preprocess_voc.py --protocol 19_1 --seed 42
 python data_preprocess/preprocess_voc.py --protocol 15_5 --seed 42
@@ -152,7 +155,7 @@ python data_preprocess/preprocess_voc.py --protocol 15_5 --seed 42
 运行generate_test_split.py
 
 ```
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python data_preprocess/generate_test_split.py --protocol 10_10 --seed 42
 python data_preprocess/generate_test_split.py --protocol 19_1 --seed 42
 python data_preprocess/generate_test_split.py --protocol 15_5 --seed 42
@@ -161,7 +164,7 @@ python data_preprocess/generate_test_split.py --protocol 15_5 --seed 42
 该目录应包含：
 
 ```
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 incremental_10_10/seed42/
 ├── category_split.json
 ├── task0_trainval.txt
@@ -207,17 +210,17 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 ### Step 1: Task 0 基类训练
 
 ```bash
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python engine/train_glip_voc.py  --protocol 10_10 --seed 42 --epochs 2 --batch-size 4 --lr 5e-5  --eval-interval 1
 ```
 
 ```
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python engine/train_glip_voc.py  --protocol 15_5 --seed 42 --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 ```
 
 ```
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python engine/train_glip_voc.py --protocol 19_1 --seed 42 --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 ```
 
@@ -264,7 +267,7 @@ work_dirs/talir_voc/10_10/seed42/
 ```bash
 for SEED in 0 1; do
   # Task 0
-  python engine//train_glip_voc.py --protocol 10_10 --seed $SEED --epochs 2 --batch-size 4 --lr 5e-5
+  python engine/train_glip_voc.py --protocol 10_10 --seed $SEED --epochs 2 --batch-size 4 --lr 5e-5
   
   # Task 1 TAM
   python engine/train_task1.py --protocol 10_10 --seed $SEED --task0-ckpt work_dirs/talir_voc/10_10/seed${SEED}/task0_best.pth --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
@@ -303,7 +306,7 @@ step1+step2，分别按照三种增量策略执行命令
 
 ```
 #10+10
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python engine/train_glip_voc.py --protocol 10_10 --seed 42 --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 
 python engine/train_task1.py --protocol 10_10 --seed 42 --task0-ckpt work_dirs/talir_voc/10_10/seed42/task0_best.pth --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
@@ -313,7 +316,7 @@ python engine/eval_sis.py test --protocol 10_10  --inference-strategy rowmax
 
 ```
 #15+5
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python engine/train_glip_voc.py --protocol 15_5 --seed 42 --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 
 python engine/train_task1.py --protocol 15_5 --seed 42 --task0-ckpt work_dirs/talir_voc/15_5/seed42/task0_best.pth --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
@@ -323,7 +326,7 @@ python engine/eval_sis.py test --protocol 15_5  --inference-strategy rowmax
 
 ```
 #19+1
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python engine/train_glip_voc.py --protocol 19_1 --seed 42 --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 
 python engine/train_task1.py --protocol 19_1 --seed 42 --task0-ckpt work_dirs/talir_voc/19_1/seed42/task0_best.pth --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
