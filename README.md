@@ -307,6 +307,7 @@ python engine/train_glip_voc.py --protocol 10_10 --seed 42 --epochs 2 --batch-si
 
 python engine/train_task1.py --protocol 10_10 --seed 42 --task0-ckpt work_dirs/talir_voc/10_10/seed42/task0_best.pth --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 
+#如已下载训练好的对应增量策略的权重，可直接跳过前两个命令，直接执行下面这条命令
 python engine/eval_sis.py test --protocol 10_10  --inference-strategy rowmax
 ```
 
@@ -317,6 +318,7 @@ python engine/train_glip_voc.py --protocol 15_5 --seed 42 --epochs 2 --batch-siz
 
 python engine/train_task1.py --protocol 15_5 --seed 42 --task0-ckpt work_dirs/talir_voc/15_5/seed42/task0_best.pth --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 
+#如已下载训练好的对应增量策略的权重，可直接跳过前两个命令，直接执行下面这条命令
 python engine/eval_sis.py test --protocol 15_5  --inference-strategy rowmax
 ```
 
@@ -327,6 +329,7 @@ python engine/train_glip_voc.py --protocol 19_1 --seed 42 --epochs 2 --batch-siz
 
 python engine/train_task1.py --protocol 19_1 --seed 42 --task0-ckpt work_dirs/talir_voc/19_1/seed42/task0_best.pth --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 
+#如已下载训练好的对应增量策略的权重，可直接跳过前两个命令，直接执行下面这条命令
 python engine/eval_sis.py test --protocol 19_1  --inference-strategy rowmax
 ```
 
@@ -343,6 +346,7 @@ python engine/train_glip_voc.py --protocol 10_10 --seed 42 --task-id 0 --epochs 
 # Task 1 (无 TAM baseline)
 python engine/train_task1.py --protocol 10_10 --task0-ckpt work_dirs\talir_voc\10_10\seed42_baseline\task0_best.pth --seed 42 --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1 --no-tam
 
+#如已下载训练好的10+10的baseline权重，可直接跳过前两个命令，直接执行下面这条命令
 python engine/eval_sis.py test baseline --protocol 10_10  --inference-strategy none
 ```
 
@@ -355,6 +359,7 @@ python engine/train_single.py --task-id 0 --protocol 10_10 --seed 42
 # Step 2: 训练 Task 1 模型（新类）
 python engine/train_single.py --task-id 1 --protocol 10_10 --seed 42
 
+#如已下载训练好的seed_der里的no_tam权重，可直接跳过前两个命令，直接执行下面三条命令
 # Step 3: Der-like SIS 评估
 python engine/eval_der.py --protocol 10_10 --seed 42 --sis rowmax
 python engine/eval_der.py --protocol 10_10 --seed 42 --sis elemax
@@ -363,16 +368,19 @@ python engine/eval_der.py --protocol 10_10 --seed 42 --sis elemean
 
 ### Vision Only + ROWMAX
 ```
+#默认已有训练好的10+10权重
 python engine/eval_sis.py test --tam-mode vision_only --protocol 10_10 --inference-strategy rowmax
 ```
 
 ### Language Only + ROWMAX
 ```
+#默认已有训练好的10+10权重
 python engine/eval_sis.py test --tam-mode language_only --protocol 10_10 --inference-strategy rowmax
 ```
 ### Vision+Language + ROWMAX/elemax/elemean
 
 ```
+#默认已有训练好的10+10权重
 python engine/eval_sis.py test --protocol 10_10  --inference-strategy elemax
 python engine/eval_sis.py test --protocol 10_10  --inference-strategy elemean
 python engine/eval_sis.py test --protocol 10_10  --inference-strategy rowmax
