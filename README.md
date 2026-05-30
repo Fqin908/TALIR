@@ -99,6 +99,15 @@ python ./pretrained/download_Bert.py
 >
 > https://download.openmmlab.com/mmdetection/v3.0/glip/glip_tiny_a_mmdet-b3654169.pth
 
+### 3.2 放入训练好的权重
+
+```
+通过百度网盘分享的文件：mmdetection-TALIR
+链接: https://pan.baidu.com/s/1WPK0o30rKm3XMU1Q9_POVw 提取码: r8xa
+提供了voc2007在SEED=42下训练好的权重，包括10+10，15+5，19+1三种增量策略，以及在10+10增量策略下训练的baseline，和用于消融实验的_notam
+链接中的work_dirs可直接复制到该项目的根目录下，pretrained中包含了下载的Bert和GLIP权重，可根据需求进行下载。
+```
+
 ---
 
 ## 四、数据准备
