@@ -1,0 +1,25 @@
+{
+    "paths": {
+        "data_root": "./data/voc2007",
+        "pretrained_dir": "./pretrained",
+        "bert_model_name": "./pretrained/bert-base-uncased",
+        "pretrained_checkpoint": "./pretrained/glip_tiny_a_mmdet-b3654169.pth",
+        "glip_config": "./configs/glip/glip_atss_swin-t_a_fpn_dyhead_pretrain_obj365.py",
+        "work_dir": "./work_dirs/talir_voc"
+    },
+    "training": {
+        "protocol": "10_10",
+        "seed": 42,
+        "device": "cuda:0",
+        "batch_size": 4,
+        "num_workers": 4,
+        "lr": 5e-05,
+        "lr_language": 5e-06,
+        "lr_backbone": 0.0,
+        "weight_decay": 0.05,
+        "epochs": 12,
+        "eval_interval": 2,
+        "freeze_backbone": true,
+        "freeze_language": true
+    }
+}
