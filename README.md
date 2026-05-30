@@ -89,7 +89,7 @@ pip install transformers==4.36.0 pillow numpy==1.24.3
 
 ```bash
 # 预训练权重放在  mmdetection-TALIR/pretrained
-cp ~/Downloads/glip_tiny_a_mmdet-b3654169 ./pretrained
+cp ~/Downloads/glip_tiny_a_mmdet-b3654169.pth ./pretrained
 ```
 
 > 如未获得权重文件，可从 [OpenMMLab 模型库](https://github.com/open-mmlab/mmdetection/blob/v3.3.0/configs/glip/README.md) 下载 `glip_tiny_mmdet.pth`，或直接点击下面的链接下载权重。
