@@ -3,29 +3,6 @@
 > 论文：*Learning Task-Aware Language-Image Representation for Class-Incremental Object Detection* (AAAI-24)
 >
 > 本指南面向**组员/测试组**，从零开始搭建环境并复现实验。
->
-> **小组分工：**
->
-> •朱嘉鹏（组长）：项目整体推进、代码架构设计及实现、实验测试（TAM, ELEMAX, ELEMEAN, 完善训练和消融实验脚本）、文档及结果汇总
->
-> •熊婷：代码架构设计及实现、实验测试（恢复GLIP权重进行训练, TAM, ROWMAX,10+10增量训练, baseline）、文档
->
-> **TALIRb实验**：
->
-> •张桓伟：15+5增量训练
->
-> •王双奇：19+1增量训练
->
-> •经李喆、贺如义: Vision+Language + ROWMAX/elemax/elemean
->
-> •江昊东: Baseline + ROWMAX/elemax/elemean
->
-> •张栩午: Vision Only + ROWMAX 和 Language Only + ROWMAX
->
-> **测试小组：**
->
-> •王宇轩、詹宁：测试其他小组
-
 ---
 
 ## 一、交付文件清单
@@ -33,8 +10,7 @@
 应包含以下内容：
 
 ```
-
-├──mmdetection-TALIR/
+├──TALIR-main/
 │   ├── README.md                      # 文档
 │   ├── configs                        # mmdetection_configs
 │   ├── mmdet                          # mmdetection
@@ -111,13 +87,25 @@ pip install transformers==4.36.0 pillow numpy==1.24.3
 ### 3.1 放入预训练权重（如交付包中包含）
 
 ```bash
-# 预训练权重放在  mmdetection-TALIR/pretrained
-cp ~/Downloads/glip_tiny_a_mmdet-b3654169 ./pretrained
+# 预训练权重放在  TALIR-main/pretrained
+cp ~/Downloads/glip_tiny_a_mmdet-b3654169.pth ./pretrained
+
+#Bert下载
+python ./pretrained/download_Bert.py
 ```
 
 > 如未获得权重文件，可从 [OpenMMLab 模型库](https://github.com/open-mmlab/mmdetection/blob/v3.3.0/configs/glip/README.md) 下载 `glip_tiny_mmdet.pth`，或直接点击下面的链接下载权重。
 >
 > https://download.openmmlab.com/mmdetection/v3.0/glip/glip_tiny_a_mmdet-b3654169.pth
+
+### 3.2 放入训练好的权重
+
+```
+通过百度网盘分享的文件：mmdetection-TALIR
+链接: https://pan.baidu.com/s/1WPK0o30rKm3XMU1Q9_POVw 提取码: r8xa
+提供了voc2007在SEED=42下训练好的权重，包括10+10，15+5，19+1三种增量策略，以及在10+10增量策略下训练的baseline，和用于消融实验的_notam
+链接中的work_dirs可直接复制到该项目的根目录下，pretrained中包含了下载的Bert和GLIP权重，可根据需求进行下载。
+```
 
 ---
 
@@ -126,7 +114,7 @@ cp ~/Downloads/glip_tiny_a_mmdet-b3654169 ./pretrained
 ### 4.1 下载 VOC2007（可在官网自行下载）
 
 ```bash
-# 在 mmdetection 同级目录创建 data 文件夹
+# 在 TALIR-main 同级目录创建 data 文件夹(最后不包含VOCdevkit这一层文件夹)
 # 下载 voc2007
 wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar
 wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar
@@ -140,7 +128,7 @@ tar -xf VOCdevkit_08-Jun-2007.tar
 
 最终目录结构应为：
 ```
-mmdetection-TALIR/data/voc2007/
+TALIR-main/data/voc2007/
 ├── Annotations/
 ├── ImageSets/
 │   └── Main/
@@ -154,7 +142,7 @@ mmdetection-TALIR/data/voc2007/
 运行preprocess_voc.py，默认当前的位置是 ~/mmdetection/
 
 ```
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python data_preprocess/preprocess_voc.py --protocol 10_10 --seed 42
 python data_preprocess/preprocess_voc.py --protocol 19_1 --seed 42
 python data_preprocess/preprocess_voc.py --protocol 15_5 --seed 42
@@ -163,7 +151,7 @@ python data_preprocess/preprocess_voc.py --protocol 15_5 --seed 42
 运行generate_test_split.py
 
 ```
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python data_preprocess/generate_test_split.py --protocol 10_10 --seed 42
 python data_preprocess/generate_test_split.py --protocol 19_1 --seed 42
 python data_preprocess/generate_test_split.py --protocol 15_5 --seed 42
@@ -172,7 +160,7 @@ python data_preprocess/generate_test_split.py --protocol 15_5 --seed 42
 该目录应包含：
 
 ```
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 incremental_10_10/seed42/
 ├── category_split.json
 ├── task0_trainval.txt
@@ -187,7 +175,7 @@ incremental_10_10/seed42/
 
 ## 五、路径修改
 
-我们的代码中有几处**硬编码的相对路径**，可根据自己的需求修改,在配置文件config.json和具体脚本中修改。
+我们的代码中有几处**硬编码的相对路径**，可根据自己的需求修改,在配置文件./engine/config.json和具体脚本中修改。
 
 ### 5.1 数据、模型权重路径
 
@@ -218,17 +206,17 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 ### Step 1: Task 0 基类训练
 
 ```bash
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python engine/train_glip_voc.py  --protocol 10_10 --seed 42 --epochs 2 --batch-size 4 --lr 5e-5  --eval-interval 1
 ```
 
 ```
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python engine/train_glip_voc.py  --protocol 15_5 --seed 42 --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 ```
 
 ```
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python engine/train_glip_voc.py --protocol 19_1 --seed 42 --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 ```
 
@@ -275,7 +263,7 @@ work_dirs/talir_voc/10_10/seed42/
 ```bash
 for SEED in 0 1; do
   # Task 0
-  python engine//train_glip_voc.py --protocol 10_10 --seed $SEED --epochs 2 --batch-size 4 --lr 5e-5
+  python engine/train_glip_voc.py --protocol 10_10 --seed $SEED --epochs 2 --batch-size 4 --lr 5e-5
   
   # Task 1 TAM
   python engine/train_task1.py --protocol 10_10 --seed $SEED --task0-ckpt work_dirs/talir_voc/10_10/seed${SEED}/task0_best.pth --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
@@ -314,31 +302,34 @@ step1+step2，分别按照三种增量策略执行命令
 
 ```
 #10+10
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python engine/train_glip_voc.py --protocol 10_10 --seed 42 --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 
 python engine/train_task1.py --protocol 10_10 --seed 42 --task0-ckpt work_dirs/talir_voc/10_10/seed42/task0_best.pth --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 
+#如已下载训练好的对应增量策略的权重，可直接跳过前两个命令，直接执行下面这条命令
 python engine/eval_sis.py test --protocol 10_10  --inference-strategy rowmax
 ```
 
 ```
 #15+5
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python engine/train_glip_voc.py --protocol 15_5 --seed 42 --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 
 python engine/train_task1.py --protocol 15_5 --seed 42 --task0-ckpt work_dirs/talir_voc/15_5/seed42/task0_best.pth --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 
+#如已下载训练好的对应增量策略的权重，可直接跳过前两个命令，直接执行下面这条命令
 python engine/eval_sis.py test --protocol 15_5  --inference-strategy rowmax
 ```
 
 ```
 #19+1
-cd /your/path/to/mmdetection-TALIR
+cd /your/path/to/TALIR-main
 python engine/train_glip_voc.py --protocol 19_1 --seed 42 --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 
 python engine/train_task1.py --protocol 19_1 --seed 42 --task0-ckpt work_dirs/talir_voc/19_1/seed42/task0_best.pth --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1
 
+#如已下载训练好的对应增量策略的权重，可直接跳过前两个命令，直接执行下面这条命令
 python engine/eval_sis.py test --protocol 19_1  --inference-strategy rowmax
 ```
 
@@ -355,6 +346,7 @@ python engine/train_glip_voc.py --protocol 10_10 --seed 42 --task-id 0 --epochs 
 # Task 1 (无 TAM baseline)
 python engine/train_task1.py --protocol 10_10 --task0-ckpt work_dirs\talir_voc\10_10\seed42_baseline\task0_best.pth --seed 42 --epochs 2 --batch-size 4 --lr 5e-5 --eval-interval 1 --no-tam
 
+#如已下载训练好的10+10的baseline权重，可直接跳过前两个命令，直接执行下面这条命令
 python engine/eval_sis.py test baseline --protocol 10_10  --inference-strategy none
 ```
 
@@ -367,6 +359,7 @@ python engine/train_single.py --task-id 0 --protocol 10_10 --seed 42
 # Step 2: 训练 Task 1 模型（新类）
 python engine/train_single.py --task-id 1 --protocol 10_10 --seed 42
 
+#如已下载训练好的seed_der里的no_tam权重，可直接跳过前两个命令，直接执行下面三条命令
 # Step 3: Der-like SIS 评估
 python engine/eval_der.py --protocol 10_10 --seed 42 --sis rowmax
 python engine/eval_der.py --protocol 10_10 --seed 42 --sis elemax
@@ -375,16 +368,19 @@ python engine/eval_der.py --protocol 10_10 --seed 42 --sis elemean
 
 ### Vision Only + ROWMAX
 ```
+#默认已有训练好的10+10权重
 python engine/eval_sis.py test --tam-mode vision_only --protocol 10_10 --inference-strategy rowmax
 ```
 
 ### Language Only + ROWMAX
 ```
+#默认已有训练好的10+10权重
 python engine/eval_sis.py test --tam-mode language_only --protocol 10_10 --inference-strategy rowmax
 ```
 ### Vision+Language + ROWMAX/elemax/elemean
 
 ```
+#默认已有训练好的10+10权重
 python engine/eval_sis.py test --protocol 10_10  --inference-strategy elemax
 python engine/eval_sis.py test --protocol 10_10  --inference-strategy elemean
 python engine/eval_sis.py test --protocol 10_10  --inference-strategy rowmax
@@ -421,19 +417,19 @@ python engine/eval_sis.py test --protocol 10_10  --inference-strategy rowmax
 
 ## 十、实验结果（seed 42, test split）
 
-| 方法 | Old mAP50 | New mAP50 | All mAP50 |
-|------|-----------|-----------|-----------|
-| 15+5：TAM (V+L+ROWMAX)     | 58.24% | 77.65% | 63.35% |
-| 19+1：TAM (V+L+ROWMAX) | 68.68% | 64.66% | 68.32% |
-| 10+10：TAM (V+L+ROWMAX) | 55.28%                                    | 75.74%                    | 65.51%                    |
-| 10+10：TAM (V+L+ELEMAX)    | 55.49%                                    | 75.93%                    | 65.71%                   |
-| 10+10：TAM (V+L+ELEMEAN)   | 56.09% | 72.53% | 64.31% |
-| 10+10：Baseline | 52.79% | 76.88% | 64.84% |
-| 10+10：ROWMAX | 63.49%    | 79.32%    | 71.36%     |
-| 10+10：ELEMAX | 62.80%    | 79.38%    | 71.09%     |
-| 10+10：ELEMEAN | 61.13%    | 75.67%    | 68.40%     |
-| 10+10：TAM (V+ROWMAX) | 55.32%                                    | 75.15%                    | 65.24%                |
-| 10+10：TAM (L+ROWMAX) | 58.57% | 76.85% | 67.71% |
+| 方法 | Old mAP50 | New mAP50 | All mAP50 | Avg |
+|:-----|:---------:|:---------:|:---------:|:---------:|
+| 15+5：TAM (V+L+ROWMAX)  主表 Table 2 | 58.24% | 77.65% | 63.35% | 66.41% |
+| 19+1：TAM (V+L+ROWMAX)  主表 Table 2 | 68.68% | 64.66% | 68.32% | 67.22% |
+| 10+10：TAM (V+L+ROWMAX) 主表 Table 2 | 55.28%                                    | 75.74%                    | 65.51%                    | 65.51%              |
+| 10+10：TAM (V+L+ELEMAX) 消融Table 4 | 55.49%                                    | 75.93%                    | 65.71%                   | -                  |
+| 10+10：TAM (V+L+ELEMEAN) 消融Table 4 | 56.09% | 72.53% | 64.31% | - |
+| 10+10：Baseline 消融Table 4 | 52.79% | 76.88% | 64.84% | - |
+| 10+10：ROWMAX 消融Table 4 | 63.49%    | 79.32%    | 71.36%     | -    |
+| 10+10：ELEMAX 消融Table 4 | 62.80%    | 79.38%    | 71.09%     | -    |
+| 10+10：ELEMEAN 消融Table 4 | 61.13%    | 75.67%    | 68.40%     | -    |
+| 10+10：TAM (V+ROWMAX) 消融Table 4 | 55.32%                                    | 75.15%                    | 65.24%                | -               |
+| 10+10：TAM (L+ROWMAX) 消融Table 4 | 58.57% | 76.85% | 67.71% | - |
 
 ---
 
