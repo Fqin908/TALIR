@@ -33,7 +33,7 @@
 
 **不打包的内容（需要自行下载）：**
 
-- **VOC2007 数据集** → 从官网下载 [open-mmlab/mmdetection: OpenMMLab Detection Toolbox and Benchmark](https://github.com/open-mmlab/mmdetection)
+- **VOC2007 数据集** → 从官网下载 https://www.robots.ox.ac.uk/~vgg/projects/pascal/VOC/voc2007/index.html
 
 - **GLIP、BERT 预训练模型** → 
 
